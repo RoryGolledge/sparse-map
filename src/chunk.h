@@ -4,8 +4,11 @@
 #include <algorithm>
 
 namespace {
-    auto constexpr calc_chunk_size(size_t dimensions, size_t dim_size) -> std::size_t {
-        auto out = size_t{1};
+    auto constexpr calc_chunk_size(
+        const std::size_t dimensions,
+        const std::size_t dim_size
+    ) -> std::size_t {
+        auto out = std::size_t{1};
         for (auto _: std::ranges::iota_view(size_t{0}, dim_size)) {
             out *= dim_size;
         }
