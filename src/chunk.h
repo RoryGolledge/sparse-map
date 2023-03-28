@@ -3,7 +3,7 @@
 #include <ranges>
 #include <algorithm>
 
-namespace {
+namespace detail {
     auto constexpr calc_chunk_size(
         const std::size_t dimensions,
         const std::size_t dim_size
@@ -38,6 +38,6 @@ private:
         return next + DimensionSize * calc_index(rest...);
     }
 
-    std::array<T, calc_chunk_size(Dimensions, DimensionSize)> data_;
+    std::array<T, detail::calc_chunk_size(Dimensions, DimensionSize)> data_;
 };
 
