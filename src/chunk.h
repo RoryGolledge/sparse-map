@@ -9,7 +9,7 @@ namespace detail {
         const std::size_t dim_size
     ) -> std::size_t {
         auto out = std::size_t{1};
-        for (auto _: std::ranges::iota_view(size_t{0}, dim_size)) {
+        for (auto _: std::ranges::iota_view(size_t{0}, dimensions)) {
             out *= dim_size;
         }
 
