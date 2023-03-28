@@ -7,16 +7,20 @@
 template <typename T, std::size_t Dimensions, std::size_t ChunkSize = 16>
 class SparseMap {
 public:
-    template <typename ...Dims> requires CorrectDims<Dimensions, Dims...>
+    // TODO: Should take in int32_t or int64_t based on processor
+    using IndexType = int;
+
+    template <typename ...Dims>
+    requires
+        CorrectDims<Dimensions, Dims...> &&
+        AllAreType<IndexType, Dims...>
     auto operator[](const Dims... dims) -> T& {
         const auto chunk_index = std::array<IndexType, Dimensions>{{ align_to_chunk(dims)... }};
-        
+
         return chunks_[chunk_index][align_inside_chunk(dims)...];
     }
 
 private:
-    // TODO: Should take in int32_t or int64_t based on processor
-    using IndexType = int;
     static constexpr IndexType SignedChunkSize = static_cast<IndexType>(ChunkSize);
 
     auto align_to_chunk(IndexType index) -> IndexType {
@@ -35,7 +39,7 @@ private:
         // https://stackoverflow.com/questions/20511347/a-good-hash-function-for-a-vector
         std::size_t operator()(std::array<IndexType, Dimensions> arr) const noexcept {
             std::size_t seed = arr.size();
-            for(const auto& i : arr) {
+            for (const auto& i : arr) {
                 seed ^= static_cast<std::size_t>(i) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
             }
             return seed;

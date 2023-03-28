@@ -20,10 +20,16 @@ namespace detail {
 template <std::size_t Expected, typename ...Dims>
 concept CorrectDims = (sizeof...(Dims) == Expected);
 
+template <typename Expected, typename ...Types>
+concept AllAreType = (... && std::is_same_v<Expected, Types>);
+
 template <typename T, std::size_t Dimensions, std::size_t DimensionSize>
 class Chunk {
 public:
-    template <typename ...Dims> requires CorrectDims<Dimensions, Dims...>
+    template <typename ...Dims>
+    requires
+        CorrectDims<Dimensions, Dims...> &&
+        AllAreType<std::size_t, Dims...>
     auto operator[](const Dims... dims) -> T& {
         return data_[calc_index(dims...)];
     }
