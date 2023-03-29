@@ -1,15 +1,24 @@
 #include <algorithm>
-#include <sys/_types/_int64_t.h>
+#include <limits>
+#include <type_traits>
 #include <unordered_map>
 
 #include "chunk.h"
 
-template <typename T, std::size_t Dimensions, std::size_t ChunkSize = 16>
+// When indexing into a `SparseMap`, positive and negative values can be used.
+// Users of this class can specify which integer type to use for indexing.
+//
+// This allows restricting whether they want signed/unsigned types and how large
+// an index can be (8 bits, 16 bits, 128 bits...)
+template <typename IndexType>
+concept ValidIndexType = 
+    std::numeric_limits<IndexType>::is_integer;
+
+template <typename T, std::size_t Dimensions, typename IndexType = int, std::size_t ChunkSize = 16>
+requires
+    ValidIndexType<IndexType>
 class SparseMap {
 public:
-    // TODO: Should take in int32_t or int64_t based on processor
-    using IndexType = int;
-
     template <typename ...Dims>
     requires
         CorrectDims<Dimensions, Dims...> &&
@@ -40,7 +49,8 @@ private:
         std::size_t operator()(std::array<IndexType, Dimensions> arr) const noexcept {
             std::size_t seed = arr.size();
             for (const auto& i : arr) {
-                seed ^= static_cast<std::size_t>(i) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+                seed ^= static_cast<typename std::make_unsigned<IndexType>::type>(i) +
+                    0x9e3779b9 + (seed << 6) + (seed >> 2);
             }
             return seed;
         }
